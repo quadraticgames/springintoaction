@@ -388,10 +388,30 @@ function drawGrid() {
         line(x, 0, x, FLOOR_Y);
     }
     
-    // Draw horizontal grid lines
+    // Draw horizontal grid lines and y-axis labels
     for (let y = 0; y <= FLOOR_Y; y += 50) {
         line(0, y, width, y);
+        
+        // Add y-axis labels (height from ground)
+        if (y < FLOOR_Y) {
+            noStroke();
+            fill(180);
+            textAlign(RIGHT);
+            textSize(10);
+            let heightValue = FLOOR_Y - y;
+            text(`${heightValue}m`, 25, y + 4);
+        }
     }
+    
+    // Add y-axis title
+    push();
+    translate(15, FLOOR_Y / 2);
+    rotate(-PI/2);
+    fill(200);
+    textAlign(CENTER);
+    textSize(12);
+    text("Height (m)", 0, 0);
+    pop();
 }
 
 function drawTargets() {
