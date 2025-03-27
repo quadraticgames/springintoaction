@@ -19,13 +19,13 @@ let missInfo = {
 }; // New variable to track if the player missed all targets
 
 // Physics constants
-const PHYSICS = { SPRING: { K: 0.03, BASE_LENGTH: 100 }, GRAVITY: 0.2, DAMPING: 0.99, 
-  FLOOR_Y: 550, LAUNCH: { X: 100, Y: 550 }, DEFAULT: { ANGLE: 45, TENSION: 15 } };
+const PHYSICS = { SPRING: { K: 0.03, BASE_LENGTH: 75 }, GRAVITY: 0.15, DAMPING: 0.99, 
+  FLOOR_Y: 412, LAUNCH: { X: 75, Y: 412 }, DEFAULT: { ANGLE: 45, TENSION: 15 } };
 
 // Game setup
 function setup() {
     // Create canvas inside the game-canvas div
-    canvas = createCanvas(1000, 650); // Increased width to properly accommodate 800m
+    canvas = createCanvas(750, 487); // Reduced by 25% from 1000x650
     canvas.parent('game-canvas');
     
     // Initialize game objects
@@ -66,7 +66,7 @@ function resetGame(resetScore = true) {
     };
     
     // Calculate projectile position based on spring
-    const angleInRadians = (90 - spring.angle) * (Math.PI / 180);
+    const angleInRadians = spring.angle * (Math.PI / 180);
     const springEndX = PHYSICS.LAUNCH.X + spring.currentLength * Math.cos(angleInRadians);
     const springEndY = PHYSICS.LAUNCH.Y - spring.currentLength * Math.sin(angleInRadians);
     
@@ -75,16 +75,16 @@ function resetGame(resetScore = true) {
         y: springEndY,
         vx: 0,
         vy: 0,
-        radius: 15,
+        radius: 11, // Reduced from 15
         isActive: true
     };
     
     // Reset targets if resetting score
     if (resetScore) {
         targets = [
-            { x: 300, y: PHYSICS.FLOOR_Y, radius: 20, isHit: false, color: color(220, 50, 50) },    // Vibrant red
-            { x: 500, y: PHYSICS.FLOOR_Y, radius: 20, isHit: false, color: color(50, 180, 50) },    // Rich green
-            { x: 700, y: PHYSICS.FLOOR_Y, radius: 20, isHit: false, color: color(70, 90, 220) }     // Deep blue
+            { x: 225, y: PHYSICS.FLOOR_Y, radius: 15, isHit: false, color: color(220, 50, 50) },    // Vibrant red
+            { x: 375, y: PHYSICS.FLOOR_Y, radius: 15, isHit: false, color: color(50, 180, 50) },    // Rich green
+            { x: 525, y: PHYSICS.FLOOR_Y, radius: 15, isHit: false, color: color(70, 90, 220) }     // Deep blue
         ];
     }
     
@@ -119,6 +119,8 @@ function updateTension() {
 
 function updateAngle() {
     if (!isLaunched) {
+        // Invert the angle to make the slider work intuitively
+        // 0 on slider = 0 degrees (horizontal), 90 on slider = 90 degrees (vertical)
         spring.angle = parseInt(this.value);
         document.getElementById('angle-value').textContent = spring.angle + '°';
         
@@ -131,7 +133,8 @@ function updateAngle() {
 
 function updateProjectilePosition() {
     // Convert angle to radians for calculation
-    const angleInRadians = (90 - spring.angle) * (Math.PI / 180);
+    // Use the angle directly instead of subtracting from 90
+    const angleInRadians = spring.angle * (Math.PI / 180);
     
     // Calculate end point of spring
     projectile.x = PHYSICS.LAUNCH.X + spring.currentLength * Math.cos(angleInRadians);
@@ -148,7 +151,8 @@ function launchProjectile() {
         const force = PHYSICS.SPRING.K * compression * 7; // Changed multiplier from 5 to 7
         
         // Convert angle to radians for calculation
-        const angleInRadians = (90 - spring.angle) * (Math.PI / 180);
+        // Use the angle directly instead of subtracting from 90
+        const angleInRadians = spring.angle * (Math.PI / 180);
         
         // Calculate initial velocity components based on force and angle
         projectile.vx = force * Math.cos(angleInRadians);
@@ -389,7 +393,7 @@ function updateUIValues() {
     
     // Update position display
     document.getElementById('position-value').textContent = 
-        `X: ${projectile.x.toFixed(1)}m, Y: ${(650 - projectile.y).toFixed(1)}m`;
+        `X: ${projectile.x.toFixed(1)}m, Y: ${(487 - projectile.y).toFixed(1)}m`;
     
     // Update velocity display
     const velocity = Math.sqrt(projectile.vx * projectile.vx + projectile.vy * projectile.vy);
@@ -442,17 +446,22 @@ function draw() {
         // Calculate rotation based on velocity or spring angle if not launched
         let rotation = 0;
         
-        if (isLaunched && (Math.abs(projectile.vx) > 0.1 || Math.abs(projectile.vy) > 0.1)) {
-            // When in flight, rotate based on velocity direction
+        if (isLaunched) {
+            // When launched, rotate based on velocity direction
             rotation = atan2(projectile.vy, projectile.vx);
         } else {
-            // When not launched, align with spring angle (reversed from previous)
-            // Convert spring angle to radians and adjust direction
-            rotation = -(90 - spring.angle) * (Math.PI / 180);
+            // When not launched, align with spring angle
+            // For the spring to go through the middle of the two flaps
+            rotation = spring.angle * (Math.PI / 180) - PI/2;
         }
         
         // Draw the SVG projectile
         drawProjectile(projectile.x, projectile.y, projectile.radius, rotation);
+    }
+    
+    // Draw tension and angle indicators on top of everything else
+    if (!isLaunched) {
+        drawTensionAndAngleIndicators();
     }
     
     pop(); // Restore transformation
@@ -486,7 +495,7 @@ function drawGrid() {
     line(0, PHYSICS.FLOOR_Y + 30, width, PHYSICS.FLOOR_Y + 30);
     
     // Add x-axis distance markers (every 100m)
-    for (let x = PHYSICS.LAUNCH.X; x <= PHYSICS.LAUNCH.X + 800; x += 100) {
+    for (let x = PHYSICS.LAUNCH.X; x <= PHYSICS.LAUNCH.X + 600; x += 100) {
         const distance = x - PHYSICS.LAUNCH.X;
         
         // Draw vertical tick mark
@@ -511,42 +520,51 @@ function drawGrid() {
         line(x, 0, x, PHYSICS.FLOOR_Y);
     }
     
-    // Draw horizontal grid lines and y-axis labels
-    for (let y = 0; y <= PHYSICS.FLOOR_Y; y += 50) {
-        // Major horizontal grid lines (every 50 pixels)
-        stroke(70);
-        strokeWeight(0.8);
-        line(0, y, width, y);
+    // Calculate pixel height that represents 50m
+    const pixelsPerMeter = PHYSICS.FLOOR_Y / 400; // Assuming 400m is the max height
+    const pixelsFor50m = pixelsPerMeter * 50;
+    
+    // Draw horizontal grid lines and y-axis labels in 50m increments
+    for (let height = 0; height <= 400; height += 50) {
+        const y = PHYSICS.FLOOR_Y - (height * pixelsPerMeter);
         
-        // Add y-axis labels (height from ground)
-        if (y < PHYSICS.FLOOR_Y) {
-            noStroke();
-            fill(180);
-            textAlign(RIGHT);
-            textSize(10);
-            let heightValue = PHYSICS.FLOOR_Y - y;
-            text(`${heightValue}m`, 35, y + 4); // Increased x-position from 25 to 35 for more left padding
+        // Only draw if within canvas bounds
+        if (y >= 0 && y <= PHYSICS.FLOOR_Y) {
+            // Major horizontal grid lines (every 50m)
+            stroke(70);
+            strokeWeight(0.8);
+            line(0, y, width, y);
             
-            // Add minor horizontal grid lines (every 10 pixels)
-            if (y < PHYSICS.FLOOR_Y - 10) {
-                for (let minorY = y + 10; minorY < y + 50 && minorY < PHYSICS.FLOOR_Y; minorY += 10) {
-                    stroke(40);
-                    strokeWeight(0.3);
-                    line(0, minorY, width, minorY);
+            // Add y-axis labels (height from ground in meters)
+            // Only draw if there's enough space from the top of the canvas
+            if (y >= 12) { // Ensure there's at least 12px from the top
+                noStroke();
+                fill(180);
+                textAlign(RIGHT);
+                textSize(10);
+                
+                // Create a small background rectangle to ensure label visibility
+                fill(30, 30, 30, 200); // Semi-transparent dark background
+                rect(0, y - 6, 40, 12, 0, 3, 3, 0);
+                
+                // Draw the text
+                fill(180);
+                text(`${height}m`, 35, y + 4);
+            }
+            
+            // Add minor horizontal grid lines (every 10m)
+            if (height < 400) {
+                for (let minorHeight = height + 10; minorHeight < height + 50 && minorHeight <= 400; minorHeight += 10) {
+                    const minorY = PHYSICS.FLOOR_Y - (minorHeight * pixelsPerMeter);
+                    if (minorY >= 0) {
+                        stroke(40);
+                        strokeWeight(0.3);
+                        line(0, minorY, width, minorY);
+                    }
                 }
             }
         }
     }
-    
-    // Add y-axis title
-    push();
-    translate(15, PHYSICS.FLOOR_Y / 2);
-    rotate(-PI/2);
-    fill(200);
-    textAlign(CENTER);
-    textSize(12);
-    text("", 0, 0);
-    pop();
 }
 
 function drawTargets() {
@@ -661,7 +679,7 @@ function drawSpring() {
     rect(PHYSICS.LAUNCH.X - 38, PHYSICS.FLOOR_Y - 18, 76, 16);
     
     // Convert angle to radians for drawing
-    const angleInRadians = (90 - spring.angle) * (Math.PI / 180);
+    const angleInRadians = spring.angle * (Math.PI / 180);
     
     if (!isLaunched) {
         // Draw compressed spring with 3D effect and gradient
@@ -755,31 +773,6 @@ function drawSpring() {
         vertex(springEndX - 1, springEndY - 1); // Slight offset for highlight
         endShape();
         
-        // Draw angle indicator line
-        stroke(200, 0, 0);
-        strokeWeight(1);
-        line(PHYSICS.LAUNCH.X, PHYSICS.LAUNCH.Y, PHYSICS.LAUNCH.X + 50 * Math.cos(angleInRadians), PHYSICS.LAUNCH.Y - 50 * Math.sin(angleInRadians));
-        
-        // Draw tension indicator
-        const tensionText = `Tension: ${spring.tension}`;
-        fill(255);
-        noStroke();
-        textAlign(CENTER);
-        textSize(12);
-        text(tensionText, PHYSICS.LAUNCH.X, PHYSICS.LAUNCH.Y - 30);
-        
-        // Draw small tension visualization bar
-        const barWidth = 40;
-        const barHeight = 5;
-        stroke(100);
-        fill(50);
-        rect(PHYSICS.LAUNCH.X - barWidth/2, PHYSICS.LAUNCH.Y - 20, barWidth, barHeight);
-        
-        // Fill based on tension
-        noStroke();
-        fill(200 + tensionRatio * 55, 200, 200);
-        rect(PHYSICS.LAUNCH.X - barWidth/2, PHYSICS.LAUNCH.Y - 20, barWidth * (spring.tension/100), barHeight);
-        
     } else {
         // Draw released spring with 3D effect
         
@@ -868,10 +861,77 @@ function drawSpring() {
     }
 }
 
+function drawTensionAndAngleIndicators() {
+    // Convert angle to radians for drawing
+    const angleInRadians = spring.angle * (Math.PI / 180);
+    
+    // Draw tension indicator
+    const tensionTextX = PHYSICS.LAUNCH.X + 70 * Math.cos(angleInRadians);
+    const tensionTextY = PHYSICS.LAUNCH.Y - 70 * Math.sin(angleInRadians);
+    
+    // Draw tension line
+    stroke(255, 100, 100, 150);
+    strokeWeight(2);
+    line(PHYSICS.LAUNCH.X, PHYSICS.LAUNCH.Y, tensionTextX, tensionTextY);
+    
+    // Draw tension value with background
+    noStroke();
+    // Background for text
+    fill(0, 0, 0, 180);
+    rectMode(CENTER);
+    rect(tensionTextX, tensionTextY - 10, 45, 20, 5);
+    
+    // Text
+    fill(255, 100, 100);
+    textAlign(CENTER);
+    textSize(12);
+    text(`${spring.tension}N`, tensionTextX, tensionTextY - 6);
+    
+    // Draw angle indicator
+    const angleArcRadius = 40;
+    // Position the angle text further away from the spring
+    const angleTextX = PHYSICS.LAUNCH.X + angleArcRadius * 1.8 * Math.cos(angleInRadians / 2);
+    const angleTextY = PHYSICS.LAUNCH.Y - angleArcRadius * 1.8 * Math.sin(angleInRadians / 2);
+    
+    // Draw angle arc
+    noFill();
+    stroke(100, 200, 255, 150);
+    strokeWeight(2);
+    arc(PHYSICS.LAUNCH.X, PHYSICS.LAUNCH.Y, angleArcRadius * 2, angleArcRadius * 2, -HALF_PI, -HALF_PI + angleInRadians);
+    
+    // Draw angle value with background
+    noStroke();
+    // Background for text
+    fill(0, 0, 0, 180);
+    rectMode(CENTER);
+    rect(angleTextX, angleTextY, 45, 20, 5);
+    
+    // Text
+    fill(100, 200, 255);
+    textAlign(CENTER);
+    textSize(12);
+    text(`${spring.angle}°`, angleTextX, angleTextY + 4);
+}
+
 function drawProjectile(x, y, radius, rotation) {
     push();
     translate(x, y);
+    
+    // Determine rotation based on game state
+    if (isLaunched) {
+        // When launched, rotate based on velocity direction
+        rotation = atan2(projectile.vy, projectile.vx);
+    } else {
+        // When not launched, align with spring angle
+        // For the spring to go through the middle of the two flaps
+        // and keep the rocket right-side up
+        rotation = spring.angle * (Math.PI / 180) - PI/2;
+    }
+    
     rotate(rotation);
+    
+    // Draw the SVG projectile
+    noStroke();
     
     // Rocket body
     // Main body
@@ -879,7 +939,7 @@ function drawProjectile(x, y, radius, rotation) {
     noStroke();
     ellipse(0, 0, radius * 2.5, radius * 2);
     
-    // Nose cone
+    // Nose cone - pointing right
     fill(240, 80, 80);
     beginShape();
     vertex(radius * 1.25, 0);
@@ -898,7 +958,7 @@ function drawProjectile(x, y, radius, rotation) {
     fill(255, 255, 255, 150);
     ellipse(-radius * 0.4, -radius * 0.1, radius * 0.3, radius * 0.3);
     
-    // Fins
+    // Fins - now pointing left (opposite to nose cone)
     fill(50, 50, 180); // Blue fins
     noStroke();
     
