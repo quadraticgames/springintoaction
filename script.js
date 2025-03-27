@@ -439,10 +439,16 @@ function draw() {
     
     // Draw projectile
     if (projectile) {
-        // Calculate rotation based on velocity
+        // Calculate rotation based on velocity or spring angle if not launched
         let rotation = 0;
+        
         if (isLaunched && (Math.abs(projectile.vx) > 0.1 || Math.abs(projectile.vy) > 0.1)) {
+            // When in flight, rotate based on velocity direction
             rotation = atan2(projectile.vy, projectile.vx);
+        } else {
+            // When not launched, align with spring angle (reversed from previous)
+            // Convert spring angle to radians and adjust direction
+            rotation = -(90 - spring.angle) * (Math.PI / 180);
         }
         
         // Draw the SVG projectile
@@ -867,77 +873,90 @@ function drawProjectile(x, y, radius, rotation) {
     translate(x, y);
     rotate(rotation);
     
-    // Main body - metallic sphere
-    // Outer circle with gradient
-    const gradientRadius = radius * 1.05; // Slightly larger for glow effect
-    
-    // Glow effect
+    // Rocket body
+    // Main body
+    fill(220, 50, 50); // Red rocket body
     noStroke();
-    for (let i = 0; i < 3; i++) {
-        const alpha = 100 - i * 30;
-        fill(100, 200, 255, alpha);
-        circle(0, 0, gradientRadius * (1 + i * 0.1));
-    }
+    ellipse(0, 0, radius * 2.5, radius * 2);
     
-    // Main metallic body
-    // Base metal color
-    fill(200, 210, 220);
-    noStroke();
-    circle(0, 0, radius * 2);
-    
-    // Highlight on top-left
-    fill(240, 240, 250, 150);
-    noStroke();
-    ellipse(-radius * 0.5, -radius * 0.5, radius, radius);
-    
-    // Shadow on bottom-right
-    fill(100, 110, 130, 100);
-    noStroke();
-    ellipse(radius * 0.5, radius * 0.5, radius * 1.2, radius * 1.2);
-    
-    // Metallic rings
-    noFill();
-    strokeWeight(2);
-    stroke(150, 160, 180);
-    ellipse(0, 0, radius * 1.8, radius * 1.8);
-    
-    strokeWeight(1);
-    stroke(170, 180, 200);
-    ellipse(0, 0, radius * 1.6, radius * 1.6);
-    
-    // Center detail
-    fill(100, 150, 200);
-    noStroke();
-    circle(0, 0, radius * 0.8);
-    
-    // Inner highlight
-    fill(150, 200, 255, 150);
-    circle(0, 0, radius * 0.5);
-    
-    // Small details - bolts or rivets
-    fill(220, 220, 230);
-    noStroke();
-    
-    // Add 6 rivets around the edge
-    for (let i = 0; i < 6; i++) {
-        const angle = i * PI / 3;
-        const boltX = cos(angle) * radius * 0.9;
-        const boltY = sin(angle) * radius * 0.9;
-        circle(boltX, boltY, radius * 0.2);
-    }
-    
-    // Add directional arrow for visual interest
-    fill(255, 100, 100);
-    noStroke();
+    // Nose cone
+    fill(240, 80, 80);
     beginShape();
-    vertex(radius * 0.7, 0);
-    vertex(radius * 0.4, -radius * 0.2);
-    vertex(radius * 0.4, -radius * 0.1);
-    vertex(0, -radius * 0.1);
-    vertex(0, radius * 0.1);
-    vertex(radius * 0.4, radius * 0.1);
-    vertex(radius * 0.4, radius * 0.2);
+    vertex(radius * 1.25, 0);
+    vertex(radius * 0.5, -radius * 0.7);
+    vertex(radius * 0.5, radius * 0.7);
     endShape(CLOSE);
+    
+    // Rocket window
+    fill(200, 230, 255);
+    stroke(30, 100, 200);
+    strokeWeight(1);
+    ellipse(-radius * 0.3, 0, radius * 0.8, radius * 0.8);
+    
+    // Window highlights
+    noStroke();
+    fill(255, 255, 255, 150);
+    ellipse(-radius * 0.4, -radius * 0.1, radius * 0.3, radius * 0.3);
+    
+    // Fins
+    fill(50, 50, 180); // Blue fins
+    noStroke();
+    
+    // Top fin
+    beginShape();
+    vertex(-radius * 0.8, -radius * 0.5);
+    vertex(-radius * 1.5, -radius * 1.2);
+    vertex(-radius * 0.5, -radius * 0.5);
+    endShape(CLOSE);
+    
+    // Bottom fin
+    beginShape();
+    vertex(-radius * 0.8, radius * 0.5);
+    vertex(-radius * 1.5, radius * 1.2);
+    vertex(-radius * 0.5, radius * 0.5);
+    endShape(CLOSE);
+    
+    // Rocket exhaust/flame effect - only when moving
+    if (isLaunched && (Math.abs(projectile.vx) > 0.5 || Math.abs(projectile.vy) > 0.5)) {
+        // Outer flame
+        fill(255, 150, 50, 150);
+        beginShape();
+        vertex(-radius * 1.2, 0);
+        vertex(-radius * 2.5, -radius * 0.7);
+        vertex(-radius * 3.0, 0);
+        vertex(-radius * 2.5, radius * 0.7);
+        endShape(CLOSE);
+        
+        // Inner flame
+        fill(255, 255, 100, 200);
+        beginShape();
+        vertex(-radius * 1.2, 0);
+        vertex(-radius * 2.0, -radius * 0.4);
+        vertex(-radius * 2.5, 0);
+        vertex(-radius * 2.0, radius * 0.4);
+        endShape(CLOSE);
+        
+        // Center flame
+        fill(255, 255, 255, 230);
+        beginShape();
+        vertex(-radius * 1.2, 0);
+        vertex(-radius * 1.8, -radius * 0.2);
+        vertex(-radius * 2.0, 0);
+        vertex(-radius * 1.8, radius * 0.2);
+        endShape(CLOSE);
+    }
+    
+    // Decorative details
+    // Rocket body stripe
+    fill(255, 255, 255);
+    rect(-radius * 0.8, -radius * 0.1, radius * 1.6, radius * 0.2);
+    
+    // Small decorative dots/rivets
+    fill(50);
+    for (let i = 0; i < 4; i++) {
+        const angle = i * PI / 2;
+        circle(radius * 0.7 * cos(angle), radius * 0.7 * sin(angle), radius * 0.1);
+    }
     
     pop();
 }
