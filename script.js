@@ -390,6 +390,9 @@ function drawGrid() {
     
     // Draw horizontal grid lines and y-axis labels
     for (let y = 0; y <= FLOOR_Y; y += 50) {
+        // Major horizontal grid lines (every 50 pixels)
+        stroke(70);
+        strokeWeight(0.8);
         line(0, y, width, y);
         
         // Add y-axis labels (height from ground)
@@ -400,6 +403,15 @@ function drawGrid() {
             textSize(10);
             let heightValue = FLOOR_Y - y;
             text(`${heightValue}m`, 25, y + 4);
+            
+            // Add minor horizontal grid lines (every 10 pixels)
+            if (y < FLOOR_Y - 10) {
+                for (let minorY = y + 10; minorY < y + 50 && minorY < FLOOR_Y; minorY += 10) {
+                    stroke(40);
+                    strokeWeight(0.3);
+                    line(0, minorY, width, minorY);
+                }
+            }
         }
     }
     
