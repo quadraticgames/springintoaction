@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Launch Physics Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spring Launch Physics Game</h1>
+            <p>Adjust the spring tension and hit all three targets to win!</p>
+        </header>
+        
+        <main>
+            <div class="game-container">
+                <div id="game-canvas"></div>
+                
+                <div class="controls-panel">
+                    <div class="control-group">
+                        <label for="spring-tension">Spring Tension:</label>
+                        <input type="range" id="spring-tension" min="1" max="100" value="50">
+                        <span id="tension-value">50</span>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="launch-angle">Launch Angle (degrees):</label>
+                        <input type="range" id="launch-angle" min="0" max="90" value="45">
+                        <span id="angle-value">45°</span>
+                    </div>
+                    
+                    <button id="launch-btn">Launch!</button>
+                    <button id="reset-btn">Reset</button>
+                </div>
+                
+                <div class="analytics-panel">
+                    <h2>Physics Analytics</h2>
+                    <div class="analytics-item">
+                        <span class="analytics-label">Current Position:</span>
+                        <span id="position-value">X: 0m, Y: 0m</span>
+                    </div>
+                    <div class="analytics-item">
+                        <span class="analytics-label">Current Velocity:</span>
+                        <span id="velocity-value">0 m/s</span>
+                    </div>
+                    <div class="analytics-item">
+                        <span class="analytics-label">Spring Force:</span>
+                        <span id="force-value">0 N</span>
+                    </div>
+                    <div class="analytics-item">
+                        <span class="analytics-label">Targets Hit:</span>
+                        <span id="targets-hit">0/3</span>
+                    </div>
+                    <div class="analytics-item">
+                        <span class="analytics-label">Efficiency:</span>
+                        <span id="efficiency-display">0% (0/0)</span>
+                    </div>
+                    
+                    <div class="physics-constants">
+                        <h3>Physics Constants</h3>
+                        <div class="constants-grid">
+                            <div class="constant-item">
+                                <span class="constant-label">Gravity:</span>
+                                <span class="constant-value" id="gravity-value">0.2 m/s²</span>
+                            </div>
+                            <div class="constant-item">
+                                <span class="constant-label">Mass:</span>
+                                <span class="constant-value" id="mass-value">1 kg</span>
+                            </div>
+                            <div class="constant-item">
+                                <span class="constant-label">Spring Constant:</span>
+                                <span class="constant-value" id="spring-constant-value">0.05 N/m</span>
+                            </div>
+                            <div class="constant-item">
+                                <span class="constant-label">Air Resistance:</span>
+                                <span class="constant-value" id="damping-value">0.99</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>A physics simulation demonstrating Hooke's Law (F = -kx) and projectile motion</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
