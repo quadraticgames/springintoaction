@@ -10,7 +10,7 @@ let launchCount = 0;
 let hitCount = 0;
 
 // Physics constants
-const SPRING_CONSTANT = 0.05; // k in Hooke's Law (F = -kx)
+const SPRING_CONSTANT = 0.03; // Reduced from 0.05 to significantly lower the spring force
 const GRAVITY = 0.2;
 const MASS = 1;
 const DAMPING = 0.99; // Air resistance factor
@@ -23,7 +23,7 @@ const DEFAULT_TENSION = 15; // Default tension value
 // Game setup
 function setup() {
     // Create canvas inside the game-canvas div
-    canvas = createCanvas(800, 650);
+    canvas = createCanvas(1000, 650); // Increased width to properly accommodate 800m
     canvas.parent('game-canvas');
     
     // Initialize game objects
@@ -156,7 +156,7 @@ function launchProjectile() {
         
         // Apply Hooke's Law: F = -kx
         const compression = spring.baseLength - spring.currentLength;
-        const force = SPRING_CONSTANT * compression * 10;
+        const force = SPRING_CONSTANT * compression * 7; // Changed multiplier from 5 to 7
         
         // Convert angle to radians for calculation
         const angleInRadians = (90 - spring.angle) * (Math.PI / 180);
@@ -225,6 +225,9 @@ function updateProjectile() {
 }
 
 function checkTargetCollisions() {
+    // Skip collision detection if projectile is not active
+    if (!projectile.isActive) return;
+    
     let targetsHitCount = 0;
     
     // First count how many targets are already hit
@@ -265,7 +268,7 @@ function checkTargetCollisions() {
 function updateUIValues() {
     // Calculate current values
     const compression = spring.baseLength - spring.currentLength;
-    const force = SPRING_CONSTANT * compression * 10;
+    const force = SPRING_CONSTANT * compression * 7; // Changed multiplier from 5 to 7
     
     // Update position display
     document.getElementById('position-value').textContent = 
@@ -294,23 +297,6 @@ function updateEfficiencyDisplay() {
             efficiencyDisplay.style.color = '#ff9900'; // Orange for low efficiency
         }
     }
-}
-
-function showScorePopup(x, y, points, isBig = false) {
-    const popup = {
-        x: x,
-        y: y,
-        points: points,
-        opacity: 1.0,
-        size: isBig ? 36 : 24,
-        life: 60 // frames
-    };
-    
-    // Removed scorePopups array
-}
-
-function updateScorePopups() {
-    // Removed scorePopups array
 }
 
 function draw() {
@@ -379,6 +365,23 @@ function drawGrid() {
     strokeWeight(1);
     line(0, FLOOR_Y + 30, width, FLOOR_Y + 30);
     
+    // Add x-axis distance markers (every 100m)
+    for (let x = LAUNCH_X; x <= LAUNCH_X + 800; x += 100) {
+        const distance = x - LAUNCH_X;
+        
+        // Draw vertical tick mark
+        stroke(200);
+        strokeWeight(1);
+        line(x, FLOOR_Y + 25, x, FLOOR_Y + 35);
+        
+        // Draw distance label
+        fill(255);
+        noStroke();
+        textAlign(CENTER);
+        textSize(12);
+        text(`${distance}m`, x, FLOOR_Y + 50);
+    }
+    
     // Draw grid
     stroke(50);
     strokeWeight(0.5);
@@ -402,7 +405,7 @@ function drawGrid() {
             textAlign(RIGHT);
             textSize(10);
             let heightValue = FLOOR_Y - y;
-            text(`${heightValue}m`, 25, y + 4);
+            text(`${heightValue}m`, 35, y + 4); // Increased x-position from 25 to 35 for more left padding
             
             // Add minor horizontal grid lines (every 10 pixels)
             if (y < FLOOR_Y - 10) {
@@ -422,7 +425,7 @@ function drawGrid() {
     fill(200);
     textAlign(CENTER);
     textSize(12);
-    text("Height (m)", 0, 0);
+    text("", 0, 0);
     pop();
 }
 
@@ -453,13 +456,13 @@ function drawTargets() {
                  target.x, target.y - target.radius + target.radius/2);
         }
         
-        // Draw distance marker on x-axis
-        const distance = target.x - LAUNCH_X;
+        // Draw vertical line connecting target to x-axis
         stroke(200);
         strokeWeight(1);
-        // Draw vertical line connecting target to x-axis
         line(target.x, target.y, target.x, FLOOR_Y + 30);
-        // Draw distance text
+        
+        // Draw distance text for targets
+        const distance = target.x - LAUNCH_X;
         fill(255);
         noStroke();
         textAlign(CENTER);
