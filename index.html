@@ -3,18 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Launch Physics Game</title>
+    <title>Spring Into Action</title>
+    <link rel="icon" href="assets/rocket-favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/p5@1.7.0/lib/p5.js"></script>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Spring Launch Physics Game</h1>
-            <p>Adjust the spring tension and hit all three targets to win!</p>
+            <h1>Spring Into Action!</h1>
+            <p>Adjust the spring tension and hit all three targets to win! <a href="#" id="learn-more-link">What am I learning?</a></p>
+            
+            <!-- Popup window for learning information -->
+            <div id="learning-popup" class="popup-window">
+                <div class="popup-content">
+                    <span class="close-popup">&times;</span>
+                    <h2>Physics in Action!</h2>
+                    <div class="popup-body">
+                        <p>🚀 <strong>Welcome, Physics Explorer!</strong> Ever wonder how catapults work or why basketballs follow a curved path?</p>
+                        
+                        <div class="physics-concepts">
+                            <div class="concept">
+                                <h3>🔄 Hooke's Law</h3>
+                                <p>The spring follows F = -kx: the more you stretch it, the harder it pushes back! Just like trampolines and bungee jumps.</p>
+                            </div>
+                            
+                            <div class="concept">
+                                <h3>📈 Projectile Motion</h3>
+                                <p>Your projectile creates a perfect arc - just like a football pass! You're seeing gravity pull your object down as it flies forward.</p>
+                            </div>
+                            
+                            <div class="concept">
+                                <h3>⚡ Energy Transfer</h3>
+                                <p>Watch spring energy (potential) transform into movement (kinetic) - like charging a battery to use later!</p>
+                            </div>
+                        </div>
+                        
+                        <p class="popup-footer">Adjust that spring, hit those targets, and become a physics master! NASA uses these same principles to launch rockets into space! 🚀</p>
+                    </div>
+                </div>
+            </div>
         </header>
         <main>
             <div class="game-container">
@@ -75,9 +106,16 @@
                 </div>
             </div>
         </main>
-        <footer>
-            <p>A physics simulation demonstrating Hooke's Law (F = -kx) and projectile motion</p>
+        <footer style="text-align: center; padding: 10px;">
+            <p style="margin: 0;">
+                A physics simulation demonstrating Hooke's Law (F = -kx) and projectile motion
+            </p>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 10px;">
+                <img src="assets/gu.png" alt="GU Logo" style="width: 40px;">
+                <img src="assets/quadratic-logo.png" alt="Quadratic Logo" style="width: 200px;">
+            </div>
         </footer>
+        
     </div>
     <script src="script.js"></script>
 </body>

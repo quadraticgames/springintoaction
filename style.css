@@ -41,12 +41,34 @@ header {
 header h1 {
     margin-bottom: 8px;
     color: var(--text-primary);
-    font-size: 2rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
     font-weight: 700;
+    letter-spacing: 1px;
     background: linear-gradient(90deg, var(--accent-primary), #b388ff);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    animation: titleGlow 2s infinite ease-in-out;
+    position: relative;
+}
+
+header h1::after {
+    content: 'Spring Into Action!';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    color: transparent;
+    filter: blur(8px);
+    opacity: 0.5;
+    background: linear-gradient(90deg, var(--accent-primary), #b388ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: titleGlow 2s infinite ease-in-out reverse;
 }
 
 header p {
@@ -66,7 +88,7 @@ header p {
     grid-column: 1;
     grid-row: 1 / span 2;
     height: 487px;
-    background-color: var(--bg-secondary);
+    background-color: rgb(71, 71, 71);
     border-radius: var(--border-radius);
     box-shadow: var(--panel-shadow);
     overflow: hidden;
@@ -144,6 +166,7 @@ button {
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 600;
+    width: 120px;
     margin-right: 6px;
     transition: all 0.2s ease;
     box-shadow: 0 2px 8px rgba(124, 77, 255, 0.3);
@@ -294,6 +317,10 @@ canvas {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .container {
+        padding: 10px 5px;
+    }
+    
     .game-container {
         grid-template-columns: 1fr;
     }
@@ -302,6 +329,14 @@ canvas {
         grid-column: 1;
         grid-row: 1;
         height: 375px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        min-width: 100%;
+    }
+    
+    canvas {
+        display: block;
+        min-width: 750px; 
     }
     
     .controls-panel {
@@ -312,5 +347,187 @@ canvas {
     .analytics-panel {
         grid-column: 1;
         grid-row: 3;
+    }
+}
+
+/* Popup Window Styling */
+.popup-window {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.popup-content {
+    position: relative;
+    background-color: var(--bg-secondary);
+    margin: 5% auto;
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    width: 80%;
+    max-width: 550px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-popup {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    color: var(--text-secondary);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.close-popup:hover {
+    color: var(--accent-primary);
+    transform: scale(1.1);
+}
+
+.popup-content h2 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent-primary), #b388ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding-right: 30px;
+}
+
+.popup-body {
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+.popup-body p {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.physics-concepts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.concept {
+    flex: 1;
+    min-width: 150px;
+    background-color: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 10px;
+    transition: transform 0.2s;
+}
+
+.concept:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.popup-body h3 {
+    margin: 0 0 6px;
+    color: var(--accent-primary);
+    font-size: 0.95rem;
+}
+
+.concept p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+.popup-footer {
+    margin-top: 10px;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+#learn-more-link {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+#learn-more-link:hover {
+    color: #b388ff;
+    text-decoration: underline;
+}
+
+#learn-more-link:after {
+    content: '?';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background-color: var(--accent-primary);
+    color: white;
+    font-size: 12px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 16px;
+    margin-left: 4px;
+    transition: all 0.2s ease;
+    transform: scale(0);
+    opacity: 0;
+}
+
+#learn-more-link:hover:after {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* Responsive adjustments for popup */
+@media (max-width: 768px) {
+    .popup-content {
+        width: 90%;
+        margin: 10% auto;
+        padding: 15px;
+    }
+    
+    .popup-content h2 {
+        font-size: 1.2rem;
+    }
+    
+    .physics-concepts {
+        flex-direction: column;
+    }
+}
+
+/* Add keyframe animation for the glowing title effect */
+@keyframes titleGlow {
+    0% {
+        text-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 20px rgba(124, 77, 255, 0.7), 0 0 30px rgba(179, 136, 255, 0.5);
+    }
+    100% {
+        text-shadow: 0 0 10px rgba(124, 77, 255, 0.3);
     }
 }

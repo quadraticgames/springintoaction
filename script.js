@@ -18,6 +18,9 @@ let missInfo = {
     scale: 1
 }; // New variable to track if the player missed all targets
 
+// Use futuristic ball instead of the original rocket
+let useFuturisticBall = true;
+
 // Physics constants
 const PHYSICS = { SPRING: { K: 0.03, BASE_LENGTH: 75 }, GRAVITY: 0.15, DAMPING: 0.99, 
   FLOOR_Y: 412, LAUNCH: { X: 75, Y: 412 }, DEFAULT: { ANGLE: 45, TENSION: 15 } };
@@ -27,6 +30,12 @@ function setup() {
     // Create canvas inside the game-canvas div
     canvas = createCanvas(750, 487); // Reduced by 25% from 1000x650
     canvas.parent('game-canvas');
+    
+    // Check if on mobile and adjust viewport if needed
+    if (window.innerWidth <= 768) {
+        // Adjust the floor position for mobile to ensure x-axis is visible
+        PHYSICS.FLOOR_Y = min(PHYSICS.FLOOR_Y, height - 75); // Ensure at least 75px for x-axis
+    }
     
     // Initialize game objects
     resetGame();
@@ -428,9 +437,9 @@ function draw() {
     // Draw coordinate grid
     drawGrid();
     
-    // Draw floor
-    fill(100);
-    rect(0, PHYSICS.FLOOR_Y, width, height - PHYSICS.FLOOR_Y);
+    // Draw floor (making it transparent to remove the grey bar)
+    noFill(); // Remove the fill to make the floor invisible
+    // rect(0, PHYSICS.FLOOR_Y, width, height - PHYSICS.FLOOR_Y); // Commented out to remove the grey bar
     
     // Draw trajectory trail
     drawTrajectory();
@@ -443,7 +452,7 @@ function draw() {
     
     // Draw projectile
     if (projectile) {
-        // Calculate rotation based on velocity or spring angle if not launched
+        // Calculate rotation based on game state
         let rotation = 0;
         
         if (isLaunched) {
@@ -451,12 +460,19 @@ function draw() {
             rotation = atan2(projectile.vy, projectile.vx);
         } else {
             // When not launched, align with spring angle
-            // For the spring to go through the middle of the two flaps
-            rotation = spring.angle * (Math.PI / 180) - PI/2;
+            // No additional rotation needed - the rocket is designed to point up at 90 degrees
+            rotation = spring.angle * (Math.PI / 180);
         }
         
-        // Draw the SVG projectile
-        drawProjectile(projectile.x, projectile.y, projectile.radius, rotation);
+        // Draw the rocket
+        if (useFuturisticBall) {
+            // For futuristic ball, use the same approach as the original rocket
+            // Don't calculate rotation here, let the drawFuturisticBall function handle it
+            // just like drawProjectile does
+            drawFuturisticBall(projectile.x, projectile.y, projectile.radius, rotation);
+        } else {
+            drawProjectile(projectile.x, projectile.y, projectile.radius, rotation);
+        }
     }
     
     // Draw tension and angle indicators on top of everything else
@@ -481,6 +497,9 @@ function draw() {
     
     // Update projectile physics
     updateProjectile();
+    
+    // Update UI values continuously
+    updateUIValues();
 }
 
 function drawGrid() {
@@ -502,13 +521,6 @@ function drawGrid() {
         stroke(200);
         strokeWeight(1);
         line(x, PHYSICS.FLOOR_Y + 25, x, PHYSICS.FLOOR_Y + 35);
-        
-        // Draw distance label
-        fill(255);
-        noStroke();
-        textAlign(CENTER);
-        textSize(12);
-        text(`${distance}m`, x, PHYSICS.FLOOR_Y + 50);
     }
     
     // Draw grid
@@ -539,17 +551,23 @@ function drawGrid() {
             // Only draw if there's enough space from the top of the canvas
             if (y >= 12) { // Ensure there's at least 12px from the top
                 noStroke();
-                fill(180);
-                textAlign(RIGHT);
-                textSize(10);
+                
+                // Special handling for 0m label to ensure it's fully visible
+                const isZeroLabel = height === 0;
+                const rectWidth = isZeroLabel ? 45 : 40;
+                const rectX = isZeroLabel ? 4 : 2;
+                const textX = isZeroLabel ? 42 : 37;
                 
                 // Create a small background rectangle to ensure label visibility
                 fill(30, 30, 30, 200); // Semi-transparent dark background
-                rect(0, y - 6, 40, 12, 0, 3, 3, 0);
+                rectMode(CORNER);
+                rect(rectX, y - 6, rectWidth, 12, 0, 3, 3, 0);
                 
                 // Draw the text
-                fill(180);
-                text(`${height}m`, 35, y + 4);
+                fill(255); // Changed to white
+                textAlign(RIGHT);
+                textSize(10);
+                text(`${height}m`, textX, y + 4);
             }
             
             // Add minor horizontal grid lines (every 10m)
@@ -658,7 +676,7 @@ function drawTargets() {
         
         // Draw distance text for targets
         const distance = target.x - PHYSICS.LAUNCH.X;
-        fill(255);
+        fill(255); // White text
         noStroke();
         textAlign(CENTER);
         textSize(14);
@@ -866,8 +884,8 @@ function drawTensionAndAngleIndicators() {
     const angleInRadians = spring.angle * (Math.PI / 180);
     
     // Draw tension indicator
-    const tensionTextX = PHYSICS.LAUNCH.X + 70 * Math.cos(angleInRadians);
-    const tensionTextY = PHYSICS.LAUNCH.Y - 70 * Math.sin(angleInRadians);
+    const tensionTextX = PHYSICS.LAUNCH.X + 90 * Math.cos(angleInRadians);
+    const tensionTextY = PHYSICS.LAUNCH.Y - 90 * Math.sin(angleInRadians);
     
     // Draw tension line
     stroke(255, 100, 100, 150);
@@ -890,8 +908,8 @@ function drawTensionAndAngleIndicators() {
     // Draw angle indicator
     const angleArcRadius = 40;
     // Position the angle text further away from the spring
-    const angleTextX = PHYSICS.LAUNCH.X + angleArcRadius * 1.8 * Math.cos(angleInRadians / 2);
-    const angleTextY = PHYSICS.LAUNCH.Y - angleArcRadius * 1.8 * Math.sin(angleInRadians / 2);
+    const angleTextX = PHYSICS.LAUNCH.X + angleArcRadius * 2.5 * Math.cos(angleInRadians / 2);
+    const angleTextY = PHYSICS.LAUNCH.Y - angleArcRadius * 2.5 * Math.sin(angleInRadians / 2);
     
     // Draw angle arc
     noFill();
@@ -1021,6 +1039,78 @@ function drawProjectile(x, y, radius, rotation) {
     pop();
 }
 
+function drawFuturisticBall(x, y, radius, rotation) {
+    push();
+    translate(x, y);
+    
+    // Determine rotation based on game state - exactly like drawProjectile
+    if (isLaunched) {
+        // When launched, rotate based on velocity direction
+        rotation = atan2(projectile.vy, projectile.vx);
+    } else {
+        // When not launched, align with spring angle
+        rotation = spring.angle * (Math.PI / 180) - PI/2;
+    }
+    
+    // Apply the rotation
+    rotate(rotation);
+    
+    // Draw futuristic ball
+    noStroke();
+    
+    // Ball shadow
+    fill(0, 0, 0, 30);
+    ellipse(0, radius * 1.8, radius * 1.8, radius * 0.4);
+    
+    // Main ball - blue gradient
+    let ballGradient = drawingContext.createRadialGradient(
+        -radius * 0.2, -radius * 0.2, 0,
+        0, 0, radius * 1.2
+    );
+    ballGradient.addColorStop(0, '#ffffff');
+    ballGradient.addColorStop(0.3, '#4b9cd3');
+    ballGradient.addColorStop(0.7, '#2a5b9c');
+    ballGradient.addColorStop(1, '#1a3a6c');
+    
+    drawingContext.fillStyle = ballGradient;
+    circle(0, 0, radius * 2);
+    
+    // Hexagonal pattern overlay
+    stroke(255, 255, 255, 180);
+    strokeWeight(1);
+    noFill();
+    
+    // Center hexagon
+    beginShape();
+    vertex(0, -radius * 0.6);
+    vertex(radius * 0.5, -radius * 0.3);
+    vertex(radius * 0.5, radius * 0.3);
+    vertex(0, radius * 0.6);
+    vertex(-radius * 0.5, radius * 0.3);
+    vertex(-radius * 0.5, -radius * 0.3);
+    endShape(CLOSE);
+    
+    // Energy glow lines
+    stroke(0, 255, 255, 200);
+    strokeWeight(1.5);
+    
+    line(-radius * 0.5, -radius * 0.5, radius * 0.5, radius * 0.5);
+    line(radius * 0.5, -radius * 0.5, -radius * 0.5, radius * 0.5);
+    line(0, -radius * 0.7, 0, radius * 0.7);
+    line(-radius * 0.7, 0, radius * 0.7, 0);
+    
+    // Highlight
+    noStroke();
+    fill(255, 255, 255, 80);
+    circle(-radius * 0.3, -radius * 0.3, radius * 0.4);
+    
+    // Energy core
+    fill(0, 255, 255, 150);
+    circle(0, 0, radius * 0.4);
+    
+    pop();
+}
+
 function drawTrajectory() {
     // Draw the trajectory path with gradient effect
     if (trailPoints.length > 1) {
@@ -1079,3 +1169,41 @@ function drawMissMessage() {
 
 // Initialize the p5.js environment
 new p5();
+
+// Learning popup functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const learnMoreLink = document.getElementById('learn-more-link');
+    const learningPopup = document.getElementById('learning-popup');
+    const closePopupBtn = document.querySelector('.close-popup');
+    
+    // Open popup when clicking the learn more link
+    learnMoreLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        learningPopup.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling behind popup
+    });
+    
+    // Close popup when clicking the X button
+    closePopupBtn.addEventListener('click', function() {
+        learningPopup.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Re-enable scrolling
+    });
+    
+    // Close popup when clicking outside the popup content
+    learningPopup.addEventListener('click', function(e) {
+        if (e.target === learningPopup) {
+            learningPopup.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        }
+    });
+    
+    // Close popup when pressing Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && learningPopup.style.display === 'block') {
+            learningPopup.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Re-enable scrolling
+        }
+    });
+});
+
+document.body.style.overflow = 'auto'; 

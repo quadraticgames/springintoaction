@@ -9,6 +9,9 @@ A web-based physics simulation game that teaches Hooke's Law and projectile moti
 - Three targets at varying distances
 - Visual feedback for target hits
 - Clean, minimalistic grid-based interface
+- Futuristic design with glowing title and sleek UI elements
+- Mobile-responsive layout for gameplay on various devices
+- Real-time velocity calculation and display
 
 ## How to Play
 
@@ -84,3 +87,34 @@ This simulation can be used to:
 ## Running the Game
 
 Simply open `index.html` in a web browser to start playing.
+
+## Recent Improvements
+
+### UI Enhancements
+- Added a futuristic glowing animation to the "Spring Into Action!" title using the Orbitron Google Font
+- Improved label positioning for better readability of tension and angle indicators
+- Enhanced grid visualization with carefully selected colors for better contrast
+- Added real-time velocity calculation and display during projectile motion
+- Redesigned the footer with a cleaner layout for logos and attribution
+
+### Mobile Responsiveness
+- Optimized the canvas for mobile devices with proper scaling
+- Implemented horizontal scrolling to ensure the x-axis is fully visible on smaller screens
+- Adjusted UI element positioning for better touch interaction
+
+### Performance Optimizations
+- Improved the physics calculation loop for smoother animations
+- Enhanced the trajectory visualization with more frequent updates
+
+## Development
+
+To modify or extend this project:
+
+1. Clone the repository
+2. Make changes to the HTML, CSS, or JavaScript files
+3. Test by opening `index.html` in a browser
+4. For substantial changes, consider creating a backup first
+
+## Credits
+
+Developed as an educational physics simulation demonstrating Hooke's Law and projectile motion principles.
